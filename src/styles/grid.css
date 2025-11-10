@@ -1,0 +1,222 @@
+/* Estilos específicos para la Vista de Cuadrícula Semanal */
+
+.weekly-grid-container {
+  --grid-border-color: rgba(156, 163, 175, 0.2);
+  --grid-hover-color: rgba(59, 130, 246, 0.05);
+  --grid-today-color: rgba(59, 130, 246, 0.1);
+}
+
+/* Scroll horizontal suave y estilizado */
+.grid-scroll-container {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(156, 163, 175, 0.4) transparent;
+}
+
+.grid-scroll-container::-webkit-scrollbar {
+  height: 8px;
+}
+
+.grid-scroll-container::-webkit-scrollbar-track {
+  background: rgba(243, 244, 246, 0.5);
+  border-radius: 4px;
+}
+
+.grid-scroll-container::-webkit-scrollbar-thumb {
+  background: linear-gradient(90deg, #60a5fa, #a855f7);
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.grid-scroll-container::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(90deg, #3b82f6, #9333ea);
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+}
+
+/* Columna de horas fija con efectos */
+.hours-column {
+  position: sticky;
+  left: 0;
+  z-index: 20;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  border-right: 1px solid var(--grid-border-color);
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
+}
+
+.hours-header {
+  background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+  border-bottom: 1px solid var(--grid-border-color);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.hour-slot {
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.hour-slot:hover .hour-label {
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+}
+
+.hour-label {
+  transition: all 0.2s ease;
+  background: linear-gradient(135deg, #eff6ff 0%, #f3e8ff 100%);
+}
+
+/* Headers de días con efectos glassmorphism */
+.day-header {
+  position: relative;
+  backdrop-filter: blur(8px);
+  transition: all 0.3s ease;
+}
+
+.day-header:hover {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(147, 51, 234, 0.1) 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Columnas de días con interacciones elegantes */
+.day-column {
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.day-canvas {
+  position: relative;
+  min-height: 100%;
+}
+
+.day-canvas:hover {
+  background: linear-gradient(
+    180deg, 
+    rgba(59, 130, 246, 0.03) 0%, 
+    rgba(147, 51, 234, 0.03) 100%
+  );
+}
+
+/* Efectos de hover para las celdas de tiempo */
+.day-canvas::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(59, 130, 246, 0.02) 50%,
+    transparent 100%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.day-canvas:hover::before {
+  opacity: 1;
+}
+
+/* Líneas de cuadrícula mejoradas */
+.day-canvas .border-dashed {
+  border-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(156, 163, 175, 0.4) 20%,
+    rgba(156, 163, 175, 0.4) 80%,
+    transparent 100%
+  ) 1;
+}
+
+/* Efectos de animación para tareas */
+.animate-scale-in {
+  animation: scaleIn 0.3s ease-out forwards;
+}
+
+@keyframes scaleIn {
+  0% {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Indicadores visuales mejorados */
+.day-header .animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .grid-layout {
+    grid-template-columns: 80px repeat(var(--days-count, 5), minmax(100px, 1fr));
+  }
+  
+  .hours-column {
+    width: 80px;
+  }
+  
+  .hour-label {
+    font-size: 10px;
+    padding: 2px 4px;
+  }
+  
+  .day-header {
+    padding: 8px;
+    font-size: 12px;
+  }
+}
+
+/* Estados especiales para días */
+.day-today {
+  background: linear-gradient(
+    180deg,
+    rgba(59, 130, 246, 0.08) 0%,
+    rgba(99, 102, 241, 0.08) 100%
+  );
+}
+
+.day-today .day-header {
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.15) 0%,
+    rgba(147, 51, 234, 0.15) 100%
+  );
+}
+
+/* Efectos de transición suave */
+* {
+  scroll-behavior: smooth;
+}
+
+/* Mejoras de accesibilidad */
+.day-canvas:focus-within {
+  outline: 2px solid rgba(59, 130, 246, 0.5);
+  outline-offset: 2px;
+}
+
+/* Loading states */
+.grid-loading {
+  background: linear-gradient(
+    90deg,
+    rgba(243, 244, 246, 0.8) 0%,
+    rgba(249, 250, 251, 0.8) 50%,
+    rgba(243, 244, 246, 0.8) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
