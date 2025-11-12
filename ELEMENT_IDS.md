@@ -12,7 +12,7 @@
 | view-toggle-day-008 | ViewToggle | Day view toggle button | src/components/ViewToggle/index.tsx | TBD |
 | view-toggle-grid-013 | ViewToggle | Grid view toggle button | src/PlanificadorTareas.tsx | 231 |
 | weekend-toggle-009 | Settings | Weekend visibility toggle | src/components/Settings/index.tsx | TBD |
-| export-button-010 | Actions | Export JSON button | src/components/Actions/index.tsx | TBD |
+| export-button-010 | Actions | Export dropdown menu (JSON/CSV/Image) | src/PlanificadorTareas.tsx | 154 |
 | import-button-011 | Actions | Import JSON button | src/components/Actions/index.tsx | TBD |
 | clear-all-button-012 | Actions | Clear all tasks button | src/components/Actions/index.tsx | TBD |
 | add-chore-button-013 | AddChore | Main add chore button | src/components/AddChoreDialog/index.tsx | TBD |
@@ -51,6 +51,11 @@
 | template-reset-046 | EditableTemplateDialog | Reset to defaults button | src/components/EditableTemplateDialog/index.tsx | 134 |
 | template-cancel-047 | EditableTemplateDialog | Cancel dialog button | src/components/EditableTemplateDialog/index.tsx | 271 |
 | template-apply-048 | EditableTemplateDialog | Apply template button | src/components/EditableTemplateDialog/index.tsx | 277 |
+| landing-hero-title-049 | Landing | Main hero title | src/pages/Landing.tsx | 46 |
+| landing-cta-button-050 | Landing | Primary CTA button in hero | src/pages/Landing.tsx | 57 |
+| landing-final-cta-051 | Landing | Final CTA button at bottom | src/pages/Landing.tsx | 157 |
+| header-brand-052 | Header | Logo and brand area | src/components/Header/index.tsx | 14 |
+| header-contact-button-055 | Header | Contact button for custom app requests | src/components/Header/index.tsx | 32 |
 
 ## Naming Convention
 Pattern: `[component]-[function]-[number]`

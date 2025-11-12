@@ -13,7 +13,12 @@
       "Bash(git remote add:*)",
       "Bash(git log:*)",
       "Bash(git add:*)",
-      "Bash(git commit -m \"$(cat <<''EOF''\nCommit inicial: Planificador de Tareas del Hogar\n\nAplicación React + TypeScript con Vite para gestión de tareas domésticas.\n\nCaracterísticas principales:\n- Sistema de tareas con 5 categorías (diaria, semanal, mensual, eventual, urgente)\n- 4 tipos de asignación (ayudante, esposa, esposo, compartido)\n- 3 vistas: semanal, cuadrícula y diaria\n- Biblioteca con 143 plantillas de tareas predefinidas\n- Sistema de drag & drop y redimensionamiento\n- Persistencia automática en localStorage\n- Exportación/importación JSON\n- Detección de conflictos de horarios\n\nStack tecnológico:\n- React 18.2.0 con TypeScript\n- Vite 5.0.8\n- Tailwind CSS 3.3.0\n- Radix UI para componentes\n- Vitest para pruebas\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")"
+      "Bash(git commit -m \"$(cat <<''EOF''\nCommit inicial: Planificador de Tareas del Hogar\n\nAplicación React + TypeScript con Vite para gestión de tareas domésticas.\n\nCaracterísticas principales:\n- Sistema de tareas con 5 categorías (diaria, semanal, mensual, eventual, urgente)\n- 4 tipos de asignación (ayudante, esposa, esposo, compartido)\n- 3 vistas: semanal, cuadrícula y diaria\n- Biblioteca con 143 plantillas de tareas predefinidas\n- Sistema de drag & drop y redimensionamiento\n- Persistencia automática en localStorage\n- Exportación/importación JSON\n- Detección de conflictos de horarios\n\nStack tecnológico:\n- React 18.2.0 con TypeScript\n- Vite 5.0.8\n- Tailwind CSS 3.3.0\n- Radix UI para componentes\n- Vitest para pruebas\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(git push:*)",
+      "Bash(vercel --version:*)",
+      "Bash(vercel:*)",
+      "Bash(npm install:*)",
+      "Bash(test:*)"
     ],
     "deny": []
   }

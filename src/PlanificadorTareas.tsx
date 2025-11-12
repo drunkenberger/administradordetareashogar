@@ -3,7 +3,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Trash2, Download, Upload, CalendarClock } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Trash2, Download, Upload, Filter, Eye, Calendar, FileSpreadsheet, Image } from "lucide-react";
 
 import { Chore, CATEGORIES, ASSIGNEES, BASE_DAYS, FULL_DAYS } from './types';
 import { STORAGE_KEY } from './constants';
@@ -35,13 +41,14 @@ export default function PlanificadorTareas() {
   const [view, setView] = useState<"week" | "grid" | "day">("week");
   const [dayIndex, setDayIndex] = useState<number>(0);
   const [showWeekend, setShowWeekend] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
 
   const DAYS_UI = useMemo(
     () => (showWeekend ? [...FULL_DAYS] : [...BASE_DAYS]),
     [showWeekend]
   );
 
-  const filtered = useMemo(() => 
+  const filtered = useMemo(() =>
     ChoreService.filterChores(chores, filterCat, filterAssignee),
     [chores, filterCat, filterAssignee]
   );
@@ -76,6 +83,28 @@ export default function PlanificadorTareas() {
       .catch(() => alert("Archivo JSON inválido"));
   }
 
+  async function handleExport(format: 'json' | 'csv' | 'image') {
+    setIsExporting(true);
+    try {
+      switch (format) {
+        case 'json':
+          ChoreService.exportToJSON(chores);
+          break;
+        case 'csv':
+          ChoreService.exportToCSV(chores);
+          break;
+        case 'image':
+          await ChoreService.exportToImage(chores, DAYS_UI.length);
+          break;
+      }
+    } catch (error) {
+      console.error('Error al exportar:', error);
+      alert('Error al exportar. Por favor intenta de nuevo.');
+    } finally {
+      setIsExporting(false);
+    }
+  }
+
   return (
     <div className="w-full min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 relative overflow-hidden">
       {/* Beautiful Background Elements */}
@@ -83,157 +112,190 @@ export default function PlanificadorTareas() {
       <div className="absolute top-0 left-0 w-72 h-72 bg-gradient-to-br from-blue-400/20 to-purple-600/20 rounded-full mix-blend-multiply filter blur-xl animate-float"></div>
       <div className="absolute top-0 right-0 w-72 h-72 bg-gradient-to-br from-purple-400/20 to-pink-600/20 rounded-full mix-blend-multiply filter blur-xl animate-float" style={{animationDelay: '2s'}}></div>
       <div className="absolute bottom-0 left-1/2 w-72 h-72 bg-gradient-to-br from-indigo-400/20 to-blue-600/20 rounded-full mix-blend-multiply filter blur-xl animate-float" style={{animationDelay: '4s'}}></div>
-      
-      <div className="relative z-10 p-4 md:p-8">
-        {/* Stunning Header */}
-        <header className="mb-8 animate-slide-down">
-          <div className="max-w-7xl mx-auto">
-            {/* Main Title Section */}
-            <div className="text-center mb-8">
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-3xl shadow-glow mb-4 animate-bounce-gentle">
-                <CalendarClock className="h-8 w-8 text-white" />
-              </div>
-              <h1 id="header-nav-004" className="text-4xl md:text-5xl font-display font-bold bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 bg-clip-text text-transparent mb-2">
-                Planificador de Tareas
-              </h1>
-              <p className="text-lg text-gray-600 font-medium">
-                Organiza tu hogar con elegancia y eficiencia ✨
-              </p>
-            </div>
-            
-            {/* Action Buttons */}
-            <div className="flex flex-wrap justify-center gap-3 mb-6">
-              <AutoPlanButton
-                daysCount={DAYS_UI.length}
-                onGenerate={setChores}
-                hasExistingChores={chores.length > 0}
-              />
-              <QuickAddFromTemplate
-                onAdd={addChore}
-                defaultDay={view === "day" ? dayIndex : 0}
-                days={DAYS_UI}
-              />
-              <TemplateButton
-                days={DAYS_UI}
-                onInsert={(items) => setChores(prev => [...prev, ...items])}
-              />
-              <EditableTemplateDialog
-                days={DAYS_UI}
-                onInsert={(items) => setChores(prev => [...prev, ...items])}
-              />
-              <Button 
-                id="export-button-010"
-                variant="secondary" 
-                onClick={() => ChoreService.exportToJSON(chores)} 
-                className="gap-2 bg-white/80 backdrop-blur-sm border-white/20 hover:bg-white/90 shadow-soft transition-all duration-300 hover:shadow-medium hover:scale-105"
-              >
-                <Download className="h-4 w-4" />
-                Exportar
-              </Button>
-              <label 
-                id="import-button-011"
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-white/20 cursor-pointer bg-white/80 backdrop-blur-sm hover:bg-white/90 text-sm font-medium transition-all duration-300 hover:shadow-medium hover:scale-105"
-              >
-                <Upload className="h-4 w-4" /> Importar
-                <input
-                  type="file"
-                  accept="application/json"
-                  className="hidden"
-                  onChange={importJSON}
-                />
-              </label>
-              <Button 
-                id="clear-all-button-012"
-                variant="destructive" 
-                onClick={clearAll} 
-                className="gap-2 bg-gradient-to-r from-rose-500 to-pink-600 border-0 hover:from-rose-600 hover:to-pink-700 shadow-soft transition-all duration-300 hover:shadow-medium hover:scale-105"
-              >
-                <Trash2 className="h-4 w-4" />
-                Vaciar
-              </Button>
-            </div>
-          </div>
-        </header>
 
-        {/* Beautiful Controls Panel */}
-        <div className="max-w-7xl mx-auto mb-8 animate-slide-up">
-          <Card className="bg-white/70 backdrop-blur-md border-white/20 shadow-strong overflow-hidden">
+      <div className="relative z-10 p-4 md:p-8">
+        {/* Main Toolbar - Quick Actions */}
+        <div className="max-w-7xl mx-auto mb-6 animate-slide-down">
+          <Card className="bg-white/80 backdrop-blur-md border-white/20 shadow-strong overflow-hidden">
             <div className="absolute inset-0 bg-glass-gradient"></div>
-            <CardContent className="relative responsive-card-padding">
-              {/* Mobile First Layout - Stack everything vertically on small screens */}
-              <div className="space-y-6">
-                
-                {/* First Row: Filters */}
-                <div className="flex flex-col space-y-4">
-                  <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wide">Filtros</h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="flex flex-col gap-2">
-                      <Label className="text-sm font-semibold text-gray-700">Categoría</Label>
-                      <Select value={filterCat} onValueChange={setFilterCat}>
-                        <SelectTrigger id="filter-category-005" className="bg-white/80 border-white/30 hover:bg-white transition-all duration-200 shadow-soft">
-                          <SelectValue placeholder="Todos" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-white/95 backdrop-blur-md border-white/30">
-                          <SelectItem value="all">Todos</SelectItem>
-                          {CATEGORIES.map((c) => (
-                            <SelectItem key={c} value={c}>
-                              {labelCat(c)}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    
-                    <div className="flex flex-col gap-2">
-                      <Label className="text-sm font-semibold text-gray-700">Responsable</Label>
-                      <Select value={filterAssignee} onValueChange={setFilterAssignee}>
-                        <SelectTrigger id="filter-assignee-006" className="bg-white/80 border-white/30 hover:bg-white transition-all duration-200 shadow-soft">
-                          <SelectValue placeholder="Todos" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-white/95 backdrop-blur-md border-white/30">
-                          <SelectItem value="all">Todos</SelectItem>
-                          {ASSIGNEES.map((a) => (
-                            <SelectItem key={a} value={a}>
-                              {labelAssignee(a)}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
+            <CardContent className="relative p-4">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                {/* Left: Primary Actions */}
+                <div className="flex flex-wrap items-center gap-2">
+                  <AutoPlanButton
+                    daysCount={DAYS_UI.length}
+                    onGenerate={setChores}
+                    hasExistingChores={chores.length > 0}
+                  />
+                  <AddChoreDialog onAdd={addChore} />
+                  <QuickAddFromTemplate
+                    onAdd={addChore}
+                    defaultDay={view === "day" ? dayIndex : 0}
+                    days={DAYS_UI}
+                  />
                 </div>
 
-                {/* Separator */}
-                <div className="w-full h-px bg-gradient-to-r from-transparent via-gray-300/50 to-transparent"></div>
-                
-                {/* Second Row: Navigation & View Controls */}
-                <div className="flex flex-col space-y-4">
-                  <h3 className="text-sm font-bold text-gray-700 uppercase tracking-wide">Navegación y Vista</h3>
-                  
-                  {/* Week Navigation - Responsive */}
-                  <div className="flex justify-center">
-                    <div className="w-full max-w-md">
-                      <WeekNav
-                        active={activeWeekStart}
-                        onChange={setActiveWeekStart}
-                        daysCount={DAYS_UI.length}
-                      />
-                    </div>
+                {/* Right: Secondary Actions */}
+                <div className="flex flex-wrap items-center gap-2">
+                  <TemplateButton
+                    days={DAYS_UI}
+                    onInsert={(items) => setChores(prev => [...prev, ...items])}
+                  />
+                  <EditableTemplateDialog
+                    days={DAYS_UI}
+                    onInsert={(items) => setChores(prev => [...prev, ...items])}
+                  />
+
+                  <div className="h-6 w-px bg-gradient-to-b from-transparent via-gray-300 to-transparent mx-1"></div>
+
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        id="export-button-010"
+                        variant="secondary"
+                        size="sm"
+                        disabled={isExporting}
+                        className="gap-2 bg-white/80 backdrop-blur-sm border-white/20 hover:bg-white/90 shadow-soft transition-all duration-300 hover:shadow-medium hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <Download className="h-3.5 w-3.5" />
+                        <span className="hidden sm:inline">
+                          {isExporting ? 'Exportando...' : 'Exportar'}
+                        </span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                      align="end"
+                      className="w-48 bg-white/95 backdrop-blur-md border-white/30 shadow-strong"
+                    >
+                      <DropdownMenuItem
+                        onClick={() => handleExport('json')}
+                        className="flex items-center gap-2 cursor-pointer hover:bg-blue-50 transition-colors"
+                      >
+                        <Download className="h-4 w-4 text-blue-600" />
+                        <span className="font-medium">Exportar JSON</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => handleExport('csv')}
+                        className="flex items-center gap-2 cursor-pointer hover:bg-green-50 transition-colors"
+                      >
+                        <FileSpreadsheet className="h-4 w-4 text-green-600" />
+                        <span className="font-medium">Exportar CSV</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => handleExport('image')}
+                        className="flex items-center gap-2 cursor-pointer hover:bg-purple-50 transition-colors"
+                      >
+                        <Image className="h-4 w-4 text-purple-600" />
+                        <span className="font-medium">Exportar Imagen</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                  <label
+                    id="import-button-011"
+                    className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border border-white/20 cursor-pointer bg-white/80 backdrop-blur-sm hover:bg-white/90 text-sm font-medium transition-all duration-300 hover:shadow-medium hover:scale-105"
+                  >
+                    <Upload className="h-3.5 w-3.5" />
+                    <span className="hidden sm:inline">Importar</span>
+                    <input
+                      type="file"
+                      accept="application/json"
+                      className="hidden"
+                      onChange={importJSON}
+                    />
+                  </label>
+                  <Button
+                    id="clear-all-button-012"
+                    variant="destructive"
+                    size="sm"
+                    onClick={clearAll}
+                    className="gap-2 bg-gradient-to-r from-rose-500 to-pink-600 border-0 hover:from-rose-600 hover:to-pink-700 shadow-soft transition-all duration-300 hover:shadow-medium hover:scale-105"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                    <span className="hidden sm:inline">Vaciar</span>
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Enhanced Controls Panel */}
+        <div className="max-w-7xl mx-auto mb-8 animate-slide-up">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+
+            {/* Filters Card */}
+            <Card className="bg-white/70 backdrop-blur-md border-white/20 shadow-strong overflow-hidden group hover:shadow-glow transition-all duration-300">
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <CardContent className="relative p-5">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center shadow-soft">
+                    <Filter className="h-4 w-4 text-white" />
                   </div>
-                  
-                  {/* View Toggle & Settings Row */}
-                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                    {/* View Toggle */}
-                    <div className="flex justify-center w-full sm:w-auto">
-                      <div className="inline-flex rounded-2xl p-1 bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-white/30 shadow-inner-soft">
+                  <h3 className="text-sm font-bold text-gray-800 uppercase tracking-wide">Filtros</h3>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Categoría</Label>
+                    <Select value={filterCat} onValueChange={setFilterCat}>
+                      <SelectTrigger id="filter-category-005" className="bg-white/90 border-gray-200/50 hover:bg-white hover:border-blue-300 transition-all duration-200 shadow-soft focus:ring-2 focus:ring-blue-400/30">
+                        <SelectValue placeholder="Todas las categorías" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white/95 backdrop-blur-md border-white/30">
+                        <SelectItem value="all">Todas las categorías</SelectItem>
+                        {CATEGORIES.map((c) => (
+                          <SelectItem key={c} value={c}>
+                            {labelCat(c)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Responsable</Label>
+                    <Select value={filterAssignee} onValueChange={setFilterAssignee}>
+                      <SelectTrigger id="filter-assignee-006" className="bg-white/90 border-gray-200/50 hover:bg-white hover:border-blue-300 transition-all duration-200 shadow-soft focus:ring-2 focus:ring-blue-400/30">
+                        <SelectValue placeholder="Todos los responsables" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white/95 backdrop-blur-md border-white/30">
+                        <SelectItem value="all">Todos los responsables</SelectItem>
+                        {ASSIGNEES.map((a) => (
+                          <SelectItem key={a} value={a}>
+                            {labelAssignee(a)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* View & Navigation Card */}
+            <Card className="lg:col-span-2 bg-white/70 backdrop-blur-md border-white/20 shadow-strong overflow-hidden group hover:shadow-glow transition-all duration-300">
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+              <CardContent className="relative p-5">
+                <div className="space-y-5">
+                  {/* View Toggle Section */}
+                  <div>
+                    <div className="flex items-center gap-2 mb-4">
+                      <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center shadow-soft">
+                        <Eye className="h-4 w-4 text-white" />
+                      </div>
+                      <h3 className="text-sm font-bold text-gray-800 uppercase tracking-wide">Vista</h3>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-3">
+                      <div className="inline-flex rounded-2xl p-1.5 bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10 border border-white/30 shadow-inner-soft">
                         <Button
                           id="view-toggle-week-007"
                           size="sm"
                           variant={view === "week" ? "default" : "ghost"}
                           onClick={() => setView("week")}
-                          className={view === "week" 
-                            ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-soft" 
-                            : "hover:bg-white/50 text-gray-700"
+                          className={view === "week"
+                            ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-soft hover:from-blue-600 hover:to-blue-700"
+                            : "hover:bg-white/50 text-gray-700 hover:text-gray-900"
                           }
                         >
                           Semana
@@ -243,9 +305,9 @@ export default function PlanificadorTareas() {
                           size="sm"
                           variant={view === "grid" ? "default" : "ghost"}
                           onClick={() => setView("grid")}
-                          className={view === "grid" 
-                            ? "bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-soft" 
-                            : "hover:bg-white/50 text-gray-700"
+                          className={view === "grid"
+                            ? "bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-soft hover:from-purple-600 hover:to-purple-700"
+                            : "hover:bg-white/50 text-gray-700 hover:text-gray-900"
                           }
                         >
                           Cuadrícula
@@ -255,36 +317,51 @@ export default function PlanificadorTareas() {
                           size="sm"
                           variant={view === "day" ? "default" : "ghost"}
                           onClick={() => setView("day")}
-                          className={view === "day" 
-                            ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-soft" 
-                            : "hover:bg-white/50 text-gray-700"
+                          className={view === "day"
+                            ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-soft hover:from-blue-600 hover:to-blue-700"
+                            : "hover:bg-white/50 text-gray-700 hover:text-gray-900"
                           }
                         >
                           Día
                         </Button>
                       </div>
-                    </div>
-                    
-                    {/* Settings & Add */}
-                    <div className="mobile-button-group">
-                      <label className="inline-flex items-center gap-2 text-sm font-medium text-gray-700 cursor-pointer hover:text-gray-900 transition-colors">
+
+                      <div className="h-6 w-px bg-gradient-to-b from-transparent via-gray-300 to-transparent"></div>
+
+                      <label className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/80 border border-gray-200/50 text-sm font-medium text-gray-700 cursor-pointer hover:bg-white hover:border-purple-300 transition-all duration-200 shadow-soft hover:shadow-medium">
                         <input
                           id="weekend-toggle-009"
                           type="checkbox"
-                          className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                          className="h-4 w-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500 focus:ring-2 transition-all duration-200"
                           checked={showWeekend}
                           onChange={(e) => setShowWeekend(e.target.checked)}
                         />
                         <span className="select-none">Fin de semana</span>
                       </label>
-                      
-                      <AddChoreDialog onAdd={addChore} />
                     </div>
                   </div>
+
+                  <div className="w-full h-px bg-gradient-to-r from-transparent via-gray-300/50 to-transparent"></div>
+
+                  {/* Week Navigation Section */}
+                  <div>
+                    <div className="flex items-center gap-2 mb-4">
+                      <div className="w-8 h-8 bg-gradient-to-br from-pink-500 to-pink-600 rounded-lg flex items-center justify-center shadow-soft">
+                        <Calendar className="h-4 w-4 text-white" />
+                      </div>
+                      <h3 className="text-sm font-bold text-gray-800 uppercase tracking-wide">Navegación</h3>
+                    </div>
+
+                    <WeekNav
+                      active={activeWeekStart}
+                      onChange={setActiveWeekStart}
+                      daysCount={DAYS_UI.length}
+                    />
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
         </div>
 
         {/* Main Content Area */}
@@ -331,8 +408,8 @@ export default function PlanificadorTareas() {
             <div className="bg-white/60 backdrop-blur-md rounded-2xl border border-white/30 p-6 shadow-soft">
               <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                    <span className="text-white text-sm font-bold">✨</span>
+                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-soft">
+                    <span className="text-white text-lg">✨</span>
                   </div>
                   <div className="text-left">
                     <p className="text-sm font-semibold text-gray-700">
@@ -343,19 +420,19 @@ export default function PlanificadorTareas() {
                     </p>
                   </div>
                 </div>
-                
-                <div className="flex items-center gap-6 text-xs text-gray-500">
+
+                <div className="flex flex-wrap items-center justify-center gap-4 text-xs text-gray-500">
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                     <span>Arrastra y redimensiona tareas</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-                    <span>Cambia entre vista Semana/Cuadrícula/Día</span>
+                    <span>3 vistas disponibles</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></div>
-                    <span>173+ plantillas disponibles</span>
+                    <span>173+ plantillas</span>
                   </div>
                 </div>
               </div>
